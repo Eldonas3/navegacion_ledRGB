@@ -1,2 +1,2 @@
 # navegacion_ledRGB
-Ejercicio numero con NodMCU
+Ejercicio numero 2 con NodMCU
