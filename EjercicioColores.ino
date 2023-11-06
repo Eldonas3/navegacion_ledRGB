@@ -19,10 +19,9 @@ unsigned long lastDebounceTimebtn2 = 0;
 unsigned long lastDebounceTimebtn3 = 0;
 unsigned long debounceDelay = 50;
 unsigned long previousMillis = 0;
-int indiceIzq = 0;
-int indiceDer = 11;
-bool indIzqVisitado = false;
-bool indDerVisitado = false;
+int indice = 1;
+bool btnIzqPresOnce = false;
+bool btnDerPresOnce = false;
 
 //Definimos como debe ser un color RGB
 typedef struct{
@@ -32,10 +31,10 @@ typedef struct{
 }color;
 
 //creamos un array de "colores" con los respectivos valores del color que quermos
-//Colores rojo,naranja,amarillo,verde lima,verde,cian,agua marina,azul indigo,violeta,magenta,rosa,blanco
-// color colores[] = {{1023, 0, 0},{1023, 563, 0},{1023, 1023, 0},{256, 829, 256},{0, 512, 0},{0, 1023, 1023},{280, 542, 451},{193, 0, 423},{439, 0, 613},{1023, 0, 1023},{1023, 727, 772},{1023, 1023, 1023}};
-color colores[] = {{0, 1023, 1023},{0, 460, 1023},{0, 0, 1023},{767, 194, 767},{1023, 511, 1023},{1023, 0, 0},{743, 481, 572},{830, 1023, 600},{584, 1023, 410},{0, 1023, 0},{0, 296, 251},{0, 0, 0}};
-String nombres[] = {"rojo","naranja","amarillo","verde lima","verde","cian","agua marina","azul indigo","violeta","magenta","rosa","blanco"};
+//Colores rojo,naranja,amarillo,verde lima,verde,cian,agua marina,azul,indigo,violeta,magenta,blanco
+color colores[] = {{0,255,255},{0,255,183},{92,255,103},{255,200,0},{255,255,0},{255,136,0},{207,52,118},{255,0,255},{4,26,47},{75,0,130},{0,0,255},{0,0,0}};
+//indigo, aguamarina,verde lima
+String nombres[] = {"rojo","naranja","amarillo","verde lima","verde","cian","agua marina","azul","indigo","violeta","magenta","blanco"};
 // 0, 460, 1023 =>1023, 145, 0=> 
 void setup() {
 pinMode(rojo,OUTPUT);
@@ -71,37 +70,28 @@ int btn3Reading = digitalRead(btn3); //boton reinicio
  if((millis()-lastDebounceTimebtn) > debounceDelay){
    if(btnReading != btnState){
       btnState = btnReading;
-        if(btnState == HIGH){ //boton fue presionado
-              if(indiceIzq != 11 && indDerVisitado == false){ //si el btnIzq no esta en el otro extremo y no ha estado en el otro extremo
-              analogWrite(rojo,colores[indiceIzq].rojo);
-              analogWrite(verde,colores[indiceIzq].verde); //usamos color actual
-              analogWrite(azul,colores[indiceIzq].azul);
+        if(btnState == HIGH){ //boton fue presionado 
+            if(btnIzqPresOnce == false && btnDerPresOnce == false){ //si ninguno de los botones a sido presionado
+              indice = 0;
+              btnIzqPresOnce = true;            
+            }    
+            if(indice <= 11 && indice > 0){ //Si se encuentra entre los colores 1 y 11, sin en el 0
+              indice = indice - 1;
+              analogWrite(rojo,colores[indice].rojo);
+              analogWrite(verde,colores[indice].verde);
+              analogWrite(azul,colores[indice].azul);
               delay(50);
-              Serial.println("Color actual: " + nombres[indiceIzq] + " Valores RGB: Rojo:" + colores[indiceIzq].rojo + " Verde:" + colores[indiceIzq].verde + " Azul:" + colores[indiceIzq].azul);//imprimos el nombre actual   y su valor rgb            
-              indiceIzq = indiceIzq  + 1;// avanzamos color    
-          }  
-        if(indDerVisitado == true){// si ya se llego al otro extremo
-              analogWrite(rojo,colores[indiceIzq].rojo);
-              analogWrite(verde,colores[indiceIzq].verde); //usamos color actual
-              analogWrite(azul,colores[indiceIzq].azul);
-              delay(50);
-               Serial.println("Color actual: " + nombres[indiceIzq] + " Valores RGB: Rojo:" + colores[indiceIzq].rojo + " Verde:" + colores[indiceIzq].verde + " Azul:" + colores[indiceIzq].azul);//imprimos el nombre actual   y su valor rgb  
-              if(indiceIzq == 0){ // si color actual es el primero otra vez
-                indDerVisitado = false;  //marcamos el extremo derecho como no visitado              
-              }else{indiceIzq = indiceIzq - 1;}  //retrocedemos un color       
-        }        
+              Serial.println("Color actual: " + nombres[indice] + " Valores RGB: Rojo:" + colores[indice].rojo + " Verde:" + colores[indice].verde + " Azul:" + colores[indice].azul);//imprimos el nombre actual   y su valor rgb                         
+            }
 
-        if(indiceIzq == 11){ //si btnIzq esta el extremo derecho
-              analogWrite(rojo,colores[indiceIzq].rojo);
-              analogWrite(verde,colores[indiceIzq].verde); //usamos color actual
-              analogWrite(azul,colores[indiceIzq].azul);
+            if(indice == 0){ //si se encuentra al inicio
+              analogWrite(rojo,colores[indice].rojo);
+              analogWrite(verde,colores[indice].verde); //conserva el color del inicio
+              analogWrite(azul,colores[indice].azul);
               delay(50);
-              Serial.println("Color actual: " + nombres[indiceIzq] + " Valores RGB: Rojo:" + colores[indiceIzq].rojo + 
-              " Verde:" + colores[indiceIzq].verde + " Azul:" + colores[indiceIzq].azul);//imprimos el nombre actual   y su valor rgb   
-              indDerVisitado = true; //marcamos como visitado el extremo derecho    
-              // indiceIzq = indiceIzq - 1;  //retrocedemos un color                
-        }  
-           
+              Serial.println("Color actual: " + nombres[indice] + " Valores RGB: Rojo:" + colores[indice].rojo + " Verde:" + colores[indice].verde + " Azul:" + colores[indice].azul);//imprimos el nombre actual   y su valor rgb         
+            }
+            
           }         
         }
    }    
@@ -110,40 +100,27 @@ int btn3Reading = digitalRead(btn3); //boton reinicio
    if(btn2Reading != btn2State){
       btn2State = btn2Reading;
         if(btn2State == HIGH){ //boton fue presionado
-          if(indiceDer != 0 && indIzqVisitado == false){//si el btnDer no esta en el otro extremo y no ha estado en el otro extremo
-              analogWrite(rojo,colores[indiceDer].rojo);
-              analogWrite(verde,colores[indiceDer].verde); //usamos color actual
-              analogWrite(azul,colores[indiceDer].azul);
-              delay(50);
-              Serial.println("Color actual: " + nombres[indiceDer] + " Valores RGB: Rojo:" + colores[indiceDer].rojo + 
-              " Verde:" + colores[indiceDer].verde + " Azul:" + colores[indiceDer].azul);//imprimos el nombre actual   y su valor rgb  
-              indiceDer = indiceDer - 1;//visitamos el otro color             
-          }
-          
-          if(indIzqVisitado == true){ // si ya llego al otro extremo
-              analogWrite(rojo,colores[indiceDer].rojo);
-              analogWrite(verde,colores[indiceDer].verde); //usamos color actual
-              analogWrite(azul,colores[indiceDer].azul);
-              delay(50);
-              Serial.println("Color actual: " + nombres[indiceDer] + " Valores RGB: Rojo:" + colores[indiceDer].rojo + 
-              " Verde:" + colores[indiceDer].verde + " Azul:" + colores[indiceDer].azul);//imprimos el nombre actual   y su valor rgb
-              if(indiceDer == 11){//si el color actual es el ultimo otra vez
-                indIzqVisitado = false; //marcamos el extremo izquierdo como no visitado
-              }else{indiceDer = indiceDer + 1;}  //aumentamos un color   
-                                             
-          }    
+              if(btnDerPresOnce == false && btnIzqPresOnce == false){ //comprueba si fue presionado una vez
+              indice = 11;
+              btnDerPresOnce = true;            
+              }
 
-          if(indiceDer == 0){//si el btnDer esta en el otro extremo
-              analogWrite(rojo,colores[indiceDer].rojo);
-              analogWrite(verde,colores[indiceDer].verde); //usamos color actual
-              analogWrite(azul,colores[indiceDer].azul);
-              delay(50);
-              Serial.println("Color actual: " + nombres[indiceDer] + " Valores RGB: Rojo:" + colores[indiceDer].rojo + 
-              " Verde:" + colores[indiceDer].verde + " Azul:" + colores[indiceDer].azul);//imprimos el nombre actual   y su valor rgb 
-              indIzqVisitado = true;  //marcamos como visitado el extremo izquierdo
-              // indiceDer = indiceDer + 1; //avanzamos al siguiente color
-         }                  
-        
+              if(indice >= 0 && indice < 11){ //Si se encuentra entre los colores 0 y 10, sin en el 11
+                indice = indice + 1;
+                analogWrite(rojo,colores[indice].rojo);
+                analogWrite(verde,colores[indice].verde);
+                analogWrite(azul,colores[indice].azul);
+                delay(50);
+              Serial.println("Color actual: " + nombres[indice] + " Valores RGB: Rojo:" + colores[indice].rojo + " Verde:" + colores[indice].verde + " Azul:" + colores[indice].azul);//imprimos el nombre actual   y su valor rgb               
+              }
+
+              if(indice == 11){//si se encuentra al final
+                analogWrite(rojo,colores[indice].rojo);
+                analogWrite(verde,colores[indice].verde); //conserva el color del final
+                analogWrite(azul,colores[indice].azul);
+                delay(50);
+              Serial.println("Color actual: " + nombres[indice] + " Valores RGB: Rojo:" + colores[indice].rojo + " Verde:" + colores[indice].verde + " Azul:" + colores[indice].azul);//imprimos el nombre actual   y su valor rgb               
+              }
         }
    }   
  } 
@@ -152,12 +129,11 @@ int btn3Reading = digitalRead(btn3); //boton reinicio
    if(btn3Reading != btn3State){
       btn3State = btn3Reading;
         if(btn3State == HIGH){ //boton fue presionado
-          //reiniciamos los indices a sus posiciones originales
-          indiceIzq = 0;
-          indiceDer = 11;
+          //reiniciamos el indice
+          indice = 1;
           //reiniciamos los extremos visitados
-          indIzqVisitado = false;
-          indDerVisitado = false;          
+          btnIzqPresOnce = false;
+          btnDerPresOnce = false;          
           //apagamos el led
           analogWrite(rojo,1023);
           analogWrite(verde,1023);
